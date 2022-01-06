@@ -1,0 +1,216 @@
+unit MensagemPadraoU;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, Buttons, ToolWin, ComCtrls, ExtCtrls, RxGIF;
+
+type
+  TBotoes = (bOk, bCancelar, bIgnorar, bSim, bNao, bImprimir);
+  TPMensagem = (mOk,mAlerta,mErro,mMenhum);
+  TMensagemPadraoF = class(TForm)
+    Panel3: TPanel;
+    Panel1: TPanel;
+    mCabecalho: TMemo;
+    mMessagem: TMemo;
+    ToolBar1: TToolBar;
+    BitOk: TBitBtn;
+    BitCancelar: TBitBtn;
+    BitIgnorar: TBitBtn;
+    BitSim: TBitBtn;
+    BitImprimir: TBitBtn;
+    BitNao: TBitBtn;
+    Panel2: TPanel;
+    eAlerta: TImage;
+    eErro: TImage;
+    eOk: TImage;
+    pnlCheck: TPanel;
+    cCiente: TCheckBox;
+
+    procedure BitOkClick(Sender: TObject);
+    procedure BitCancelarClick(Sender: TObject);
+    procedure BitIgnorarClick(Sender: TObject);
+    procedure BitSimClick(Sender: TObject);
+    procedure BitNaoClick(Sender: TObject);
+    procedure BitImprimirClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure eOkClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+  private
+    { Private declarations }
+    vFechaTela : Boolean;
+  public
+    { Public declarations }
+  end;
+
+
+    function key_status_lib_mensagem(Key: integer): boolean;
+
+    function MensagemPadrao(tipo:TPMensagem; botoes:Array of TBotoes;
+      titulo:String='Mensagem do Sistema';cabecalho:String='';
+        mensagem:string='';ciencia:Boolean=False):TBotoes;
+
+  procedure CriaForm(tipo:TPMensagem;botoes:Array of TBotoes; titulo, cabecalho ,menssagem:string; ciencia:Boolean);
+
+var
+  MensagemPadraoF: TMensagemPadraoF;
+  vRetorno : TBotoes;
+
+implementation
+
+{$R *.dfm}
+procedure CriaForm(tipo:TPMensagem;botoes:Array of TBotoes;
+                   titulo, cabecalho, menssagem:string;ciencia:Boolean);
+var
+ Form  : TMensagemPadraoF;
+ x     : Integer;
+begin
+ Form:=TMensagemPadraoF.Create(Nil);
+
+ Form.BitOk.Visible := False;
+ Form.BitCancelar.Visible := False;
+ Form.BitIgnorar.Visible := False;
+ Form.BitSim.Visible := False;
+ Form.BitNao.Visible := False;
+ Form.BitImprimir.Visible := False;
+
+ Form.eOk.Visible := False;
+ Form.eErro.Visible := False;;
+ Form.eAlerta.Visible := False;
+
+ for x := 0 to high(botoes) do
+ begin
+  if botoes[x]=bOk       then  Form.BitOk.Visible := True;
+  if botoes[x]=bCancelar then  Form.BitCancelar.Visible := True;
+  if botoes[x]=bIgnorar  then  Form.BitIgnorar.Visible := True;
+  if botoes[x]=bSim      then  Form.BitSim.Visible := True;
+  if botoes[x]=bNao      then  Form.BitNao.Visible := True;
+  if botoes[x]=bImprimir then  Form.BitImprimir.Visible := True;
+ end;
+
+ if tipo = mOk      then Form.eOk.Visible := True;
+ if tipo = mErro    then Form.eErro.Visible := True;
+ if tipo = mAlerta  then Form.eAlerta.Visible := True;
+
+ if ciencia = True then
+  Form.pnlCheck.Visible := True
+ else
+  Form.pnlCheck.Visible := False;
+
+ Form.mCabecalho.Lines.Text := cabecalho;
+ Form.mMessagem.Lines.Text  := menssagem;
+ Form.Caption               := titulo;
+
+ Form.ShowModal;
+
+end;
+
+
+procedure TMensagemPadraoF.BitOkClick(Sender: TObject);
+begin
+ if pnlCheck.Visible = True then
+ begin
+   if cCiente.Checked = False then
+   begin
+     ShowMessage('[ALERTA] Para realizar essa operação marque estar ciente da operação.' + #13 + 'Verifique;');
+     Abort;
+   end;
+ end;
+ vFechaTela := True;
+ vRetorno:=bOk;
+ Close;
+end;
+
+procedure TMensagemPadraoF.BitCancelarClick(Sender: TObject);
+begin
+ vFechaTela := False;
+ vRetorno:=bCancelar;
+ Close;
+end;
+
+procedure TMensagemPadraoF.BitIgnorarClick(Sender: TObject);
+begin
+ vFechaTela := True;
+ vRetorno:=bIgnorar;
+ Close;
+end;
+
+procedure TMensagemPadraoF.BitSimClick(Sender: TObject);
+begin
+ if pnlCheck.Visible = True then
+ begin
+   if cCiente.Checked = False then
+   begin
+     ShowMessage('[ALERTA] Para realizar essa operação marque estar ciente da operação.' + #13 + 'Verifique;');
+     Abort;
+   end;
+ end;
+ vFechaTela := True;
+ vRetorno:=bSim;
+ Close;
+end;
+
+procedure TMensagemPadraoF.BitNaoClick(Sender: TObject);
+begin
+ vFechaTela := True;
+ vRetorno:=bNao;
+ Close;
+end;
+
+procedure TMensagemPadraoF.BitImprimirClick(Sender: TObject);
+begin
+  //PrcPrintMemoList(mMessagem.Lines);
+  vRetorno:=bImprimir;
+end;
+
+//function MensagemPadrao(tipo: TPMensagem;
+//  botoes: array of TBotoes; titulo, cabecalho, mensagem: string;ciencia:Boolean=False): TBotoes;
+function MensagemPadrao(tipo:TPMensagem; botoes:Array of TBotoes;
+  titulo:String='Mensagem do Sistema';cabecalho:String='';
+    mensagem:string='';ciencia:Boolean=False):TBotoes;
+begin
+ CriaForm(tipo,botoes,titulo,cabecalho,mensagem,ciencia);
+ result:=vRetorno;
+end;
+
+procedure TMensagemPadraoF.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+ if not vFechaTela then
+   Action := caNone
+ else
+   Action := caFree;
+
+ MensagemPadraoF.Free;
+end;
+
+procedure TMensagemPadraoF.eOkClick(Sender: TObject);
+begin
+ ShowMessage('HADOUKEN!!!!!!!!');
+end;
+
+procedure TMensagemPadraoF.FormShow(Sender: TObject);
+begin
+  vFechaTela := False;
+end;
+
+procedure TMensagemPadraoF.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+ if (key_status_lib_mensagem(VK_LMENU)) and (Key = VK_F4) then
+ begin
+   vFechaTela := False;
+   exit;
+ end;
+end;
+
+function key_status_lib_mensagem(Key: integer): boolean;
+begin
+  Result := Odd(GetKeyState(Key));
+end;
+
+
+end.
